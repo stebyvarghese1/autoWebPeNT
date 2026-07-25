@@ -1,0 +1,9 @@
+autowebpnt (1.0.0-1) unstable; urgency=medium
+
+  * Initial release of autoWebPeNT v1.0.0.
+  * Integrated 15+ Kali Linux penetration testing tools into 4 phases.
+  * Multi-threaded pipeline execution support.
+  * Client-ready executive PDF security report generation.
+  * Enhanced CLI support for company branding and credential masking.
+
+ -- Authorized Security Team <security@example.com>  Mon, 20 Jul 2026 12:00:00 +0000

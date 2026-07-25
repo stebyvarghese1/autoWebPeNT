@@ -1,0 +1,60 @@
+.TH AUTOWEBPNT 1 "July 2026" "autoWebPeNT 1.0.0" "User Commands"
+.SH NAME
+autowebpnt \- Automated Web Penetration Testing Framework
+.SH SYNOPSIS
+.B autowebpnt
+\-d \fIDOMAIN\fR [\fIOPTIONS\fR]
+.SH DESCRIPTION
+.B autoWebPeNT
+is an automated web penetration testing framework designed for Kali Linux. It orchestrates 15+ industry standard security tools across four sequential phases: Reconnaissance, Port Scanning, Web Enumeration, and Vulnerability Exploitation. Output is generated as a client-ready executive PDF report (e.g., autowebpnt_report_example_com_YYYYMMDD_HHMMSS.pdf).
+.SH OPTIONS
+.TP
+\fB\-d\fR, \fB\-\-domain\fR \fIDOMAIN\fR
+Target domain to assess (e.g., example.com). Required.
+.TP
+\fB\-\-skip\-recon\fR
+Skip Phase 1: Reconnaissance (Amass, Sublist3r, theHarvester, DNSRecon, WhatWeb).
+.TP
+\fB\-\-skip\-scan\fR
+Skip Phase 2: Port Scanning (RustScan, Nmap).
+.TP
+\fB\-\-skip\-web\fR
+Skip Phase 3: Web Enumeration (Gobuster, FFUF, Dirsearch, Nikto, WPScan, Nuclei).
+.TP
+\fB\-\-skip\-exploit\fR
+Skip Phase 4: Vulnerability Exploitation (Sqlmap, XSStrike, Commix, Hydra).
+.TP
+\fB\-\-threads\fR \fIN\fR
+Maximum concurrent thread pool workers for parallel tool execution (default: 3).
+.TP
+\fB\-\-company\fR \fINAME\fR
+Client or company name for report header (default: "Authorized Security Audit").
+.TP
+\fB\-\-show\-creds\fR
+Show unredacted credentials in generated PDF report (default).
+.TP
+\fB\-\-no\-creds\fR
+Mask credentials in generated PDF report.
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Display CLI help banner and exit.
+.SH EXIT STATUS
+.TP
+.B 0
+Success. All requested phases completed cleanly.
+.TP
+.B 1
+Invalid CLI arguments or usage.
+.TP
+.B 2
+Pre-flight check failed. One or more required tool binaries were not found in PATH.
+.TP
+.B 3
+Directory or environment initialization error.
+.SH SEE ALSO
+.BR nmap (1),
+.BR amass (1),
+.BR gobuster (1),
+.BR nuclei (1),
+.BR sqlmap (1)
+

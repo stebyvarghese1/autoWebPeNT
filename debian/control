@@ -1,0 +1,35 @@
+Source: autowebpnt
+Section: utils
+Priority: optional
+Maintainer: Authorized Security Team <security@example.com>
+Build-Depends: debhelper-compat (= 13), python3
+Standards-Version: 4.6.2
+Homepage: https://launchpad.net/~security/+archive/ubuntu/autowebpnt
+
+Package: autowebpnt
+Architecture: all
+Depends: ${misc:Depends},
+ ${python3:Depends},
+ python3,
+ amass,
+ sublist3r,
+ theharvester,
+ dnsrecon,
+ whatweb,
+ rustscan,
+ nmap,
+ gobuster,
+ ffuf,
+ dirsearch,
+ nikto,
+ wpscan,
+ nuclei,
+ sqlmap,
+ xsstrike,
+ commix,
+ hydra
+Recommends: python3-xhtml2pdf | wkhtmltopdf | chromium
+Description: Automated Web Penetration Testing Framework
+ autoWebPeNT is an automated web penetration testing orchestration framework
+ that integrates 15+ industry-standard Kali Linux tools into a single, cohesive,
+ four-phase pipeline with executive PDF reporting.

@@ -1,0 +1,10 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_install:
+	install -d $(CURDIR)/debian/autowebpnt/usr/bin
+	install -m 0755 autoWebPeNT.py $(CURDIR)/debian/autowebpnt/usr/bin/autowebpnt
+	install -d $(CURDIR)/debian/autowebpnt/usr/share/man/man1
+	install -m 0644 man/autowebpnt.1 $(CURDIR)/debian/autowebpnt/usr/share/man/man1/autowebpnt.1
