@@ -7,12 +7,13 @@
 ## 📋 Table of Contents
 
 1. [Prerequisites & Tool Installation](#1-prerequisites--tool-installation)
-2. [Quick Start](#2-quick-start)
-3. [Command-Line Options](#3-command-line-options)
-4. [Usage Examples](#4-usage-examples)
-5. [Building & Installing Debian Package (`.deb`)](#5-building--installing-debian-package-deb)
-6. [Executive PDF Report](#6-executive-pdf-report)
-7. [Exit Codes](#7-exit-codes)
+2. [Installation from GitHub](#2-installation-from-github)
+3. [Quick Start](#3-quick-start)
+4. [Command-Line Options](#4-command-line-options)
+5. [Usage Examples](#5-usage-examples)
+6. [Building & Installing Debian Package (`.deb`)](#6-building--installing-debian-package-deb)
+7. [Executive PDF Report](#7-executive-pdf-report)
+8. [Exit Codes](#8-exit-codes)
 
 ---
 
@@ -20,9 +21,26 @@
 
 `autoWebPeNT` requires Python 3.8+ and is optimized for Kali Linux. `autoWebPeNT` automatically detects missing dependencies during pre-flight check and attempts to install them via `apt`.
 
+---
 
+## 2. Installation from GitHub
 
-## 2. Quick Start
+To clone and set up `autoWebPeNT` directly from GitHub:
+
+```bash
+# Clone the repository
+git clone https://github.com/stebyvarghese1/autoWebPeNT.git
+
+# Navigate into the project directory
+cd autoWebPeNT
+
+# Make the script executable
+chmod +x autoWebPeNT.py
+```
+
+---
+
+## 3. Quick Start
 
 Run a complete 4-phase security assessment against a target domain with a single command:
 
@@ -30,7 +48,7 @@ Run a complete 4-phase security assessment against a target domain with a single
 python3 autoWebPeNT.py -d example.com
 ```
 
-## 3. Command-Line Options
+## 4. Command-Line Options
 
 ```
 Usage: autowebpnt -d <domain> [OPTIONS]
@@ -52,7 +70,7 @@ Optional Arguments:
 
 ---
 
-## 4. Usage Examples
+## 5. Usage Examples
 
 ### Example 1: Standard Full Scan
 ```bash
@@ -79,7 +97,7 @@ python3 autoWebPeNT.py -d target.com --skip-scan --skip-web --skip-exploit
 
 ---
 
-## 5. Building & Installing Debian Package (`.deb`)
+## 6. Building & Installing Debian Package (`.deb`)
 
 To build and install `autoWebPeNT` natively on Kali Linux using the provided `debian/` packaging infrastructure:
 
@@ -101,7 +119,7 @@ man autowebpnt
 
 ---
 
-## 6. Executive PDF Report
+## 7. Executive PDF Report
 
 Upon completing an assessment, `autoWebPeNT` automatically generates a client-ready executive PDF report in the current working directory named:
 
@@ -123,7 +141,7 @@ autowebpnt_report_<target>_<timestamp>.pdf
 
 ---
 
-## 7. Exit Codes
+## 8. Exit Codes
 
 | Code | Meaning | Action Needed |
 |------|---------|---------------|
