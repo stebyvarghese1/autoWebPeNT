@@ -59,13 +59,9 @@ TOOLS = {
     "amass":           "amass",
     "sublist3r":       "sublist3r",
     "assetfinder":     "assetfinder",
-    "findomain":       "findomain",
-    "theharvester":    "theHarvester",
+    "theharvester":    "theharvester",
     "reconng":         "recon-ng",
     "spiderfoot":      "spiderfoot",
-    "gau":             "gau",
-    "waybackurls":     "waybackurls",
-    "httpx":           "httpx",
     "dnsrecon":        "dnsrecon",
     "dnsenum":         "dnsenum",
     "fierce":          "fierce",
@@ -76,10 +72,9 @@ TOOLS = {
     # ================================
     # Port Scanning
     # ================================
-    "naabu":           "naabu",
-    "rustscan":        "rustscan",
     "nmap":            "nmap",
     "masscan":         "masscan",
+    "rustscan":        "rustscan",
 
     # ================================
     # Web Enumeration
@@ -90,17 +85,11 @@ TOOLS = {
     "dirb":            "dirb",
     "feroxbuster":     "feroxbuster",
     "wfuzz":           "wfuzz",
-    "katana":          "katana",
-    "hakrawler":       "hakrawler",
-    "gospider":        "gospider",
-    "paramspider":     "ParamSpider",
-    "arjun":           "arjun",
 
     # ================================
     # Web Technology Fingerprinting
     # ================================
-    "wappalyzer":      "wappalyzer",
-    "cmseek":          "CMSeeK",
+    "cmseek":          "cmseek",
 
     # ================================
     # Vulnerability Assessment
@@ -117,52 +106,47 @@ TOOLS = {
     # Web Proxy / Manual Testing
     # ================================
     "burpsuite":       "burpsuite",
-    "zap":             "zap",
+    "zap":             "zaproxy",
     "caido":           "caido",
 
     # ================================
     # Injection Testing
     # ================================
     "sqlmap":          "sqlmap",
-    "nosqlmap":        "nosqlmap",
     "commix":          "commix",
-    "tplmap":          "tplmap",
-    "xxeinjector":     "XXEinjector",
-    "ssrfmap":         "SSRFmap",
 
     # ================================
     # XSS Testing
     # ================================
     "xsstrike":        "xsstrike",
-    "dalfox":          "dalfox",
     "xsser":           "xsser",
 
     # ================================
-    # Authentication & JWT Testing
+    # Authentication Testing
     # ================================
     "hydra":           "hydra",
     "medusa":          "medusa",
     "patator":         "patator",
-    "jwttool":         "jwt_tool",
 
     # ================================
     # API Security Testing
     # ================================
-    "postman":         "postman",
-    "insomnia":        "insomnia",
-    "kiterunner":      "kiterunner",
-
+    # Postman / Insomnia are normally
+    # installed separately, not through
+    # Kali APT.
+    
     # ================================
-    # Web Utilities
+    # Web / Network Utilities
     # ================================
     "curl":            "curl",
     "wget":            "wget",
     "jq":              "jq",
     "openssl":         "openssl",
     "tcpdump":         "tcpdump",
-    "wireshark":       "wireshark",
+    "wireshark":        "wireshark",
     "tshark":          "tshark",
 }
+
 WORDLISTS = {
     # ==========================
     # Directory & File Discovery
