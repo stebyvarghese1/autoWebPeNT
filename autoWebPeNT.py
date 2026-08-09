@@ -765,7 +765,7 @@ def generate_pdf_report(html_content, pdf_path):
                     if "wkhtmltopdf" in binary.lower():
                         cmd = [binary, "--quiet", temp_html_path, pdf_abs]
                     else:
-                        cmd = [binary, "--headless", "--disable-gpu", f"--print-to-pdf={pdf_abs}", temp_html_path]
+                        cmd = [binary, "--headless", "--disable-gpu", "--no-pdf-header-footer", f"--print-to-pdf={pdf_abs}", temp_html_path]
                     
                     res = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=60)
                     if os.path.exists(pdf_abs) and os.path.getsize(pdf_abs) > 0:
@@ -1586,13 +1586,31 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
     .toc-box a {{ color: var(--accent); text-decoration: none; font-weight: 600; margin-right: 15px; }}
     
     @media print {{
-        body {{ background-color: #ffffff; color: #000000; padding: 0; }}
-        .container {{ max-width: 100%; }}
-        .header, .section-card, .vuln-card, .log-block, .cover-meta-item, .cover-score-box {{ background: #ffffff; border: 1px solid #cccccc; color: #000000; box-shadow: none; }}
-        h1, h2, h3, h4, .cover-title {{ color: #000000; }}
-        .poc-box {{ background: #f6f8fa; color: #24292e; border: 1px solid #e1e4e8; white-space: pre-wrap; word-break: break-all; }}
-        code {{ background: #f6f8fa; color: #000000; border: 1px solid #e1e4e8; }}
-        th {{ background: #f0f0f0; color: #000000; }}
+        body {{ background-color: #ffffff !important; color: #000000 !important; padding: 0 !important; }}
+        .container {{ max-width: 100% !important; }}
+        .header, .section-card, .vuln-card, .log-block, .cover-meta-item, .cover-score-box {{ background: #ffffff !important; border: 1px solid #cccccc !important; color: #000000 !important; box-shadow: none !important; }}
+        h1, h2, h3, h4, .cover-title {{ color: #000000 !important; }}
+        .poc-box {{ background: #f6f8fa !important; color: #24292e !important; border: 1px solid #e1e4e8 !important; white-space: pre-wrap !important; word-break: break-all !important; }}
+        code {{ background: #f6f8fa !important; color: #000000 !important; border: 1px solid #e1e4e8 !important; }}
+        th {{ background: #f0f0f0 !important; color: #000000 !important; }}
+        
+        /* Overrides for cover page and text contrast */
+        .cover-subtitle {{ color: #333333 !important; }}
+        .cover-meta-label {{ color: #555555 !important; }}
+        .cover-meta-value {{ color: #000000 !important; }}
+        .cover-score-box div {{ color: #000000 !important; }}
+        .cover-footer {{ color: #555555 !important; border-top: 1px solid #cccccc !important; }}
+        
+        .metric-value {{ color: #000000 !important; }}
+        .header-title strong {{ color: #000000 !important; }}
+        
+        .vuln-meta-table th {{ color: #555555 !important; }}
+        .vuln-meta-table td {{ color: #000000 !important; }}
+        
+        /* Inline style color overrides for white-on-white text */
+        [style*="color: #ffffff"], [style*="color:#ffffff"], [style*="color: white"], [style*="color:white"] {{
+            color: #000000 !important;
+        }}
     }}
 </style>
 </head>
