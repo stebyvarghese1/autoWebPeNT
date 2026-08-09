@@ -1495,18 +1495,7 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
 
     {waf_banner_html}
 
-    <!-- Table of Contents -->
-    <div class="toc-box">
-        <strong>Report Contents:</strong> &nbsp;
-        <a href="#executive-summary">1. Executive Summary</a>
-        <a href="#vulnerabilities">2. Confirmed Vulnerabilities</a>
-        <a href="#tech-stack">3. Tech Stack</a>
-        <a href="#recon-intel">4. Subdomains</a>
-        <a href="#network-services">5. Network Services</a>
-        <a href="#recommendations">6. Recommendations</a>
-        <a href="#compliance">7. Compliance</a>
-        <a href="#logs-vault">8. Execution Logs</a>
-    </div>
+    {toc_html}
 
     <!-- Section 1: Executive Summary -->
     <div class="section-card" id="executive-summary">
