@@ -59,12 +59,9 @@ TOOLS = {
     "amass":           "amass",
     "sublist3r":       "sublist3r",
     "assetfinder":     "assetfinder",
-    "findomain":       "findomain",
     "theharvester":    "theharvester",
     "reconng":         "recon-ng",
     "spiderfoot":      "spiderfoot",
-    "gau":             "gau",
-    "waybackurls":     "waybackurls",
     "httpx":           "httpx-toolkit",
     "dnsrecon":        "dnsrecon",
     "dnsenum":         "dnsenum",
@@ -76,7 +73,6 @@ TOOLS = {
     # ================================
     # Port Scanning
     # ================================
-    "naabu":           "naabu",
     "nmap":            "nmap",
     "masscan":         "masscan",
     "rustscan":        "rustscan",
@@ -90,16 +86,11 @@ TOOLS = {
     "dirb":            "dirb",
     "feroxbuster":     "feroxbuster",
     "wfuzz":           "wfuzz",
-    "katana":          "katana",
-    "hakrawler":       "hakrawler",
-    "gospider":        "gospider",
-    "paramspider":     "paramspider",
     "arjun":           "arjun",
 
     # ================================
     # Web Technology Fingerprinting
     # ================================
-    "wappalyzer":      "wappalyzer",
     "cmseek":          "cmseek",
 
     # ================================
@@ -109,48 +100,26 @@ TOOLS = {
     "nikto":           "nikto",
     "wpscan":          "wpscan",
     "joomscan":        "joomscan",
-    "droopescan":      "droopescan",
     "sslscan":         "sslscan",
-    "testssl":         "testssl.sh",
-
-    # ================================
-    # Web Proxy / Manual Testing
-    # ================================
-    "burpsuite":       "burpsuite",
-    "zap":             "zaproxy",
-    "caido":           "caido",
 
     # ================================
     # Injection Testing
     # ================================
     "sqlmap":          "sqlmap",
-    "nosqlmap":        "nosqlmap",
     "commix":          "commix",
-    "tplmap":          "tplmap",
-    "xxeinjector":     "xxeinjector",
-    "ssrfmap":         "ssrfmap",
 
     # ================================
     # XSS Testing
     # ================================
     "xsstrike":        "xsstrike",
-    "dalfox":          "dalfox",
     "xsser":           "xsser",
 
     # ================================
-    # Authentication & Token Testing
+    # Authentication Testing
     # ================================
     "hydra":           "hydra",
     "medusa":          "medusa",
     "patator":         "patator",
-    "jwttool":         "jwt-tool",
-
-    # ================================
-    # API Security Testing
-    # ================================
-    "postman":         "postman",
-    "insomnia":        "insomnia",
-    "kiterunner":      "kiterunner",
 
     # ================================
     # Web / Network Utilities
