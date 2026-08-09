@@ -59,9 +59,13 @@ TOOLS = {
     "amass":           "amass",
     "sublist3r":       "sublist3r",
     "assetfinder":     "assetfinder",
+    "findomain":       "findomain",
     "theharvester":    "theharvester",
     "reconng":         "recon-ng",
     "spiderfoot":      "spiderfoot",
+    "gau":             "gau",
+    "waybackurls":     "waybackurls",
+    "httpx":           "httpx-toolkit",
     "dnsrecon":        "dnsrecon",
     "dnsenum":         "dnsenum",
     "fierce":          "fierce",
@@ -72,6 +76,7 @@ TOOLS = {
     # ================================
     # Port Scanning
     # ================================
+    "naabu":           "naabu",
     "nmap":            "nmap",
     "masscan":         "masscan",
     "rustscan":        "rustscan",
@@ -85,10 +90,16 @@ TOOLS = {
     "dirb":            "dirb",
     "feroxbuster":     "feroxbuster",
     "wfuzz":           "wfuzz",
+    "katana":          "katana",
+    "hakrawler":       "hakrawler",
+    "gospider":        "gospider",
+    "paramspider":     "paramspider",
+    "arjun":           "arjun",
 
     # ================================
     # Web Technology Fingerprinting
     # ================================
+    "wappalyzer":      "wappalyzer",
     "cmseek":          "cmseek",
 
     # ================================
@@ -113,28 +124,34 @@ TOOLS = {
     # Injection Testing
     # ================================
     "sqlmap":          "sqlmap",
+    "nosqlmap":        "nosqlmap",
     "commix":          "commix",
+    "tplmap":          "tplmap",
+    "xxeinjector":     "xxeinjector",
+    "ssrfmap":         "ssrfmap",
 
     # ================================
     # XSS Testing
     # ================================
     "xsstrike":        "xsstrike",
+    "dalfox":          "dalfox",
     "xsser":           "xsser",
 
     # ================================
-    # Authentication Testing
+    # Authentication & Token Testing
     # ================================
     "hydra":           "hydra",
     "medusa":          "medusa",
     "patator":         "patator",
+    "jwttool":         "jwt-tool",
 
     # ================================
     # API Security Testing
     # ================================
-    # Postman / Insomnia are normally
-    # installed separately, not through
-    # Kali APT.
-    
+    "postman":         "postman",
+    "insomnia":        "insomnia",
+    "kiterunner":      "kiterunner",
+
     # ================================
     # Web / Network Utilities
     # ================================
@@ -143,7 +160,7 @@ TOOLS = {
     "jq":              "jq",
     "openssl":         "openssl",
     "tcpdump":         "tcpdump",
-    "wireshark":        "wireshark",
+    "wireshark":       "wireshark",
     "tshark":          "tshark",
 }
 
@@ -151,55 +168,59 @@ WORDLISTS = {
     # ==========================
     # Directory & File Discovery
     # ==========================
-    "dir_small":      "/usr/share/seclists/Discovery/Web-Content/common.txt",
-    "dir_medium":     "/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt",
-    "dir_large":      "/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-big.txt",
-    "raft_small":     "/usr/share/seclists/Discovery/Web-Content/raft-small-directories.txt",
-    "raft_medium":    "/usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt",
-    "raft_large":     "/usr/share/seclists/Discovery/Web-Content/raft-large-directories.txt",
+    "dir_small":        "/usr/share/seclists/Discovery/Web-Content/common.txt",
+    "dir_medium":       "/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt",
+    "dir_large":        "/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-big.txt",
+    "raft_small":       "/usr/share/seclists/Discovery/Web-Content/raft-small-directories.txt",
+    "raft_medium":      "/usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt",
+    "raft_large":       "/usr/share/seclists/Discovery/Web-Content/raft-large-directories.txt",
 
     # ==========================
     # File Extensions
     # ==========================
-    "extensions":     "/usr/share/seclists/Discovery/Web-Content/web-extensions.txt",
+    "extensions":       "/usr/share/seclists/Discovery/Web-Content/web-extensions.txt",
 
     # ==========================
-    # Subdomains
+    # Subdomains & Hostnames
     # ==========================
-    "sub_small":      "/usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt",
-    "sub_medium":     "/usr/share/seclists/Discovery/DNS/subdomains-top1million-20000.txt",
-    "sub_large":      "/usr/share/seclists/Discovery/DNS/combined_subdomains.txt",
+    "subdomain":        "/usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt",
+    "subdomains":       "/usr/share/seclists/Discovery/DNS/subdomains-top1million-20000.txt",
+    "sub_small":        "/usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt",
+    "sub_medium":       "/usr/share/seclists/Discovery/DNS/subdomains-top1million-20000.txt",
+    "sub_large":        "/usr/share/seclists/Discovery/DNS/combined_subdomains.txt",
 
     # ==========================
     # Virtual Hosts
     # ==========================
-    "vhosts":         "/usr/share/seclists/Discovery/DNS/namelist.txt",
+    "vhosts":           "/usr/share/seclists/Discovery/DNS/namelist.txt",
 
     # ==========================
     # Parameters
     # ==========================
-    "parameters":     "/usr/share/seclists/Discovery/Web-Content/burp-parameter-names.txt",
+    "parameters":       "/usr/share/seclists/Discovery/Web-Content/burp-parameter-names.txt",
 
     # ==========================
     # Usernames
     # ==========================
-    "users_small":    "/usr/share/seclists/Usernames/top-usernames-shortlist.txt",
-    "users_large":    "/usr/share/seclists/Usernames/xato-net-10-million-usernames.txt",
+    "users":            "/usr/share/seclists/Usernames/top-usernames-shortlist.txt",
+    "usernames":        "/usr/share/seclists/Usernames/top-usernames-shortlist.txt",
+    "users_small":      "/usr/share/seclists/Usernames/top-usernames-shortlist.txt",
+    "users_large":      "/usr/share/seclists/Usernames/xato-net-10-million-usernames.txt",
 
     # ==========================
     # Passwords
     # ==========================
-    "passwords":      "/usr/share/wordlists/rockyou.txt",
-    "passwords_small":"/usr/share/seclists/Passwords/Common-Credentials/10k-most-common.txt",
-    "passwords_large":"/usr/share/seclists/Passwords/Common-Credentials/10-million-password-list-top-1000000.txt",
+    "passwords":        "/usr/share/wordlists/rockyou.txt",
+    "passwords_small":  "/usr/share/seclists/Passwords/Common-Credentials/10k-most-common.txt",
+    "passwords_large":  "/usr/share/seclists/Passwords/Common-Credentials/10-million-password-list-top-1000000.txt",
 
     # ==========================
     # Fuzzing
     # ==========================
-    "fuzz":           "/usr/share/seclists/Fuzzing/quick.txt",
-    "lfi":            "/usr/share/seclists/Fuzzing/LFI/LFI-Jhaddix.txt",
-    "ssti":           "/usr/share/seclists/Fuzzing/template-engines-special-vars.txt",
-    "xss":            "/usr/share/seclists/Fuzzing/XSS/XSS-Jhaddix.txt",
+    "fuzz":             "/usr/share/seclists/Fuzzing/quick.txt",
+    "lfi":              "/usr/share/seclists/Fuzzing/LFI/LFI-Jhaddix.txt",
+    "ssti":             "/usr/share/seclists/Fuzzing/template-engines-special-vars.txt",
+    "xss":              "/usr/share/seclists/Fuzzing/XSS/XSS-Jhaddix.txt",
 }
 
 # ─── CVE Valuation & Financial Risk Engine ───────────────────────────────────
