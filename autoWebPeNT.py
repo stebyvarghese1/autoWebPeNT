@@ -600,7 +600,7 @@ def install_missing_tools(missing_tools):
     if not pkgs:
         return False
 
-    print(f"  {CYAN}[*] Automatically installing missing tools via apt package manager...{RESET}")
+    print(f"  {CYAN}[*] Installing missing tools via apt package manager...{RESET}")
     print(f"      {GRAY}{' '.join(pkgs)}{RESET}\n")
 
     is_root = hasattr(os, "geteuid") and os.geteuid() == 0
@@ -626,16 +626,22 @@ def check_tools(auto_install=True):
 
     if missing and auto_install:
         print(f"  {YELLOW}[!] Pre-flight alert: {len(missing)} missing security tool(s) detected.{RESET}")
-        install_missing_tools(missing)
+        print(f"      {GRAY}{', '.join(missing)}{RESET}")
+        
+        choice = input(f"  {CYAN}[?] Would you like to install the missing tools now? (y/N): {RESET}").strip().lower()
+        if choice in ['y', 'yes']:
+            install_missing_tools(missing)
 
-        # Re-check tool availability after installation attempt
-        available = []
-        missing = []
-        for name, binary in TOOLS.items():
-            if shutil.which(binary):
-                available.append(name)
-            else:
-                missing.append(name)
+            # Re-check tool availability after installation attempt
+            available = []
+            missing = []
+            for name, binary in TOOLS.items():
+                if shutil.which(binary):
+                    available.append(name)
+                else:
+                    missing.append(name)
+        else:
+            print(f"  {YELLOW}[*] Skipping installation. Some features may be unavailable.{RESET}")
 
     if missing:
         print(f"  {YELLOW}[!] Warning: {len(missing)} tools are missing from system PATH:{RESET}")
