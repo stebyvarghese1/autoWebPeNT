@@ -737,7 +737,7 @@ def extract_discovered_endpoints(work_dir, target):
 # ─── PDF Generation Engine ───────────────────────────────────────────────────
 
 def generate_pdf_report(html_content, pdf_path):
-    """Convert HTML report string directly into a client-ready PDF document."""
+    """Convert HTML report string directly into a client-ready PDF document and save HTML source."""
     candidates = [
         r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
         r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
@@ -1790,32 +1790,50 @@ def print_terminal_logs_summary(report_data):
 def _task_amass(target, work_dir):
     out = os.path.join(work_dir, "recon", "amass.txt")
     cmd = f"{TOOLS['amass']} enum -d {shlex.quote(target)} -o {shlex.quote(out)} -quiet"
-    run_cmd(cmd, timeout=600)
-    return open(out).read() if os.path.exists(out) else "Amass completed."
+    log_output = run_cmd(cmd, timeout=600, capture=True)
+    if os.path.exists(out) and os.path.getsize(out) > 0:
+        with open(out, "r", errors="ignore") as f:
+            return f.read()
+    return log_output or "(Amass completed — No subdomains output returned)"
 
 def _task_sublist3r(target, work_dir):
     out = os.path.join(work_dir, "recon", "sublist3r.txt")
     cmd = f"{TOOLS['sublist3r']} -d {shlex.quote(target)} -o {shlex.quote(out)}"
-    run_cmd(cmd, timeout=300)
-    return open(out).read() if os.path.exists(out) else "Sublist3r completed."
+    log_output = run_cmd(cmd, timeout=300, capture=True)
+    if os.path.exists(out) and os.path.getsize(out) > 0:
+        with open(out, "r", errors="ignore") as f:
+            return f.read()
+    return log_output or "(Sublist3r completed — No subdomains output returned)"
 
 def _task_harvester(target, work_dir):
     out = os.path.join(work_dir, "recon", "theharvester.html")
     cmd = f"{TOOLS['theharvester']} -d {shlex.quote(target)} -b google,bing,linkedin -f {shlex.quote(out)}"
-    run_cmd(cmd, timeout=180)
-    return f"Report generated at {out}" if os.path.exists(out) else "theHarvester completed."
+    log_output = run_cmd(cmd, timeout=180, capture=True)
+    if os.path.exists(out):
+        try:
+            with open(out, "r", errors="ignore") as f:
+                return f.read()
+        except Exception:
+            pass
+    return log_output or f"Report generated at {out}"
 
 def _task_dnsrecon(target, work_dir):
     out = os.path.join(work_dir, "recon", "dnsrecon.txt")
     cmd = f"{TOOLS['dnsrecon']} -d {shlex.quote(target)} -t std --csv {shlex.quote(out)}"
-    run_cmd(cmd, timeout=120)
-    return open(out).read() if os.path.exists(out) else "DNSRecon completed."
+    log_output = run_cmd(cmd, timeout=120, capture=True)
+    if os.path.exists(out) and os.path.getsize(out) > 0:
+        with open(out, "r", errors="ignore") as f:
+            return f.read()
+    return log_output or "(DNSRecon completed)"
 
 def _task_whatweb(target, work_dir):
     out = os.path.join(work_dir, "recon", "whatweb.json")
     cmd = f"{TOOLS['whatweb']} {shlex.quote(target)} --log-json={shlex.quote(out)}"
-    run_cmd(cmd, timeout=120)
-    return open(out).read() if os.path.exists(out) else "WhatWeb completed."
+    log_output = run_cmd(cmd, timeout=120, capture=True)
+    if os.path.exists(out) and os.path.getsize(out) > 0:
+        with open(out, "r", errors="ignore") as f:
+            return f.read()
+    return log_output or "(WhatWeb completed)"
 
 def phase_recon(target, work_dir, max_workers=3):
     print_phase_header(1, "RECONNAISSANCE & TARGET INTELLIGENCE")
@@ -1901,48 +1919,69 @@ def _task_gobuster(web_target, work_dir):
     out = os.path.join(work_dir, "web", "gobuster.txt")
     wl = get_wordlist_path("dir_small", work_dir)
     cmd = f"{TOOLS['gobuster']} dir -u {shlex.quote(web_target)} -w {shlex.quote(wl)} -t 50 -o {shlex.quote(out)}"
-    run_cmd(cmd, timeout=300)
-    return open(out).read() if os.path.exists(out) else "Gobuster completed."
+    log_output = run_cmd(cmd, timeout=300, capture=True)
+    if os.path.exists(out) and os.path.getsize(out) > 0:
+        with open(out, "r", errors="ignore") as f:
+            return f.read()
+    return log_output or "(Gobuster completed — No findings)"
 
 def _task_ffuf_params(web_target, work_dir):
     out = os.path.join(work_dir, "web", "ffuf_params.txt")
     wl = get_wordlist_path("dir_small", work_dir)
     cmd = f"{TOOLS['ffuf']} -u {shlex.quote(web_target)}/FUZZ -w {shlex.quote(wl)} -ac -o {shlex.quote(out)} -of json"
-    run_cmd(cmd, timeout=300)
-    return open(out).read() if os.path.exists(out) else "FFUF Params completed."
+    log_output = run_cmd(cmd, timeout=300, capture=True)
+    if os.path.exists(out) and os.path.getsize(out) > 0:
+        with open(out, "r", errors="ignore") as f:
+            return f.read()
+    return log_output or "(FFUF Params completed — No findings)"
 
 def _task_ffuf_vhost(web_target, target, work_dir):
     out = os.path.join(work_dir, "web", "ffuf_vhost.txt")
     wl = get_wordlist_path("subdomain", work_dir)
     cmd = f"{TOOLS['ffuf']} -u {shlex.quote(web_target)} -H 'Host: FUZZ.{target}' -w {shlex.quote(wl)} -ac -o {shlex.quote(out)} -of json"
-    run_cmd(cmd, timeout=300)
-    return open(out).read() if os.path.exists(out) else "FFUF VHost completed."
+    log_output = run_cmd(cmd, timeout=300, capture=True)
+    if os.path.exists(out) and os.path.getsize(out) > 0:
+        with open(out, "r", errors="ignore") as f:
+            return f.read()
+    return log_output or "(FFUF VHost completed — No findings)"
 
 def _task_dirsearch(web_target, work_dir):
     out = os.path.join(work_dir, "web", "dirsearch.txt")
     wl = get_wordlist_path("dir_medium", work_dir)
     cmd = f"{TOOLS['dirsearch']} -u {shlex.quote(web_target)} -w {shlex.quote(wl)} -t 50 --format=plain -o {shlex.quote(out)}"
-    run_cmd(cmd, timeout=600)
-    return open(out).read() if os.path.exists(out) else "Dirsearch completed."
+    log_output = run_cmd(cmd, timeout=600, capture=True)
+    if os.path.exists(out) and os.path.getsize(out) > 0:
+        with open(out, "r", errors="ignore") as f:
+            return f.read()
+    return log_output or "(Dirsearch completed — No findings)"
 
 def _task_nikto(web_target, work_dir):
     out = os.path.join(work_dir, "web", "nikto.txt")
     cmd = f"{TOOLS['nikto']} -h {shlex.quote(web_target)} -o {shlex.quote(out)}"
-    run_cmd(cmd, timeout=600)
-    return open(out).read() if os.path.exists(out) else "Nikto completed."
+    log_output = run_cmd(cmd, timeout=600, capture=True)
+    if os.path.exists(out) and os.path.getsize(out) > 0:
+        with open(out, "r", errors="ignore") as f:
+            return f.read()
+    return log_output or "(Nikto completed — No findings)"
 
 def _task_wpscan(web_target, work_dir):
     out = os.path.join(work_dir, "web", "wpscan.txt")
     cmd = f"{TOOLS['wpscan']} --url {shlex.quote(web_target)} --enumerate vp,vt,u --output {shlex.quote(out)}"
-    run_cmd(cmd, timeout=600)
-    return open(out).read() if os.path.exists(out) else "WPScan completed."
+    log_output = run_cmd(cmd, timeout=600, capture=True)
+    if os.path.exists(out) and os.path.getsize(out) > 0:
+        with open(out, "r", errors="ignore") as f:
+            return f.read()
+    return log_output or "(WPScan completed — No findings)"
 
 def _task_nuclei(web_target, work_dir):
     out_txt = os.path.join(work_dir, "web", "nuclei.txt")
     out_json = os.path.join(work_dir, "web", "nuclei.json")
     cmd = f"{TOOLS['nuclei']} -u {shlex.quote(web_target)} -o {shlex.quote(out_txt)} -jsonl-output {shlex.quote(out_json)}"
-    run_cmd(cmd, timeout=600)
-    return open(out_txt).read() if os.path.exists(out_txt) else "Nuclei completed."
+    log_output = run_cmd(cmd, timeout=600, capture=True)
+    if os.path.exists(out_txt) and os.path.getsize(out_txt) > 0:
+        with open(out_txt, "r", errors="ignore") as f:
+            return f.read()
+    return log_output or "(Nuclei completed — No findings)"
 
 def phase_web_enum(target, work_dir, subdomains=None, max_workers=3):
     print_phase_header(3, "WEB ATTACK SURFACE & PATH ENUMERATION")
@@ -1970,9 +2009,12 @@ def _task_sqlmap(target, work_dir, param_urls):
     out_dir = os.path.join(work_dir, "exploit", "sqlmap")
     target_url = param_urls[0] if param_urls else f"https://{target}/?id=1"
     cmd = f"{TOOLS['sqlmap']} -u {shlex.quote(target_url)} --batch --level=2 --risk=2 --output-dir={shlex.quote(out_dir)}"
-    run_cmd(cmd, timeout=900)
+    log_output = run_cmd(cmd, timeout=900, capture=True)
     log_file = os.path.join(out_dir, "log")
-    return open(log_file).read() if os.path.exists(log_file) else "Sqlmap completed."
+    if os.path.exists(log_file) and os.path.getsize(log_file) > 0:
+        with open(log_file, "r", errors="ignore") as f:
+            return f.read()
+    return log_output or "(Sqlmap completed — No vulnerability logs generated)"
 
 def _task_xsstrike(target, work_dir, param_urls):
     out = os.path.join(work_dir, "exploit", "xsstrike.txt")
@@ -1982,16 +2024,22 @@ def _task_xsstrike(target, work_dir, param_urls):
         cmd = f"python3 {shlex.quote(binary)} -u {shlex.quote(target_url)} --file-output={shlex.quote(out)}"
     else:
         cmd = f"{shlex.quote(binary)} -u {shlex.quote(target_url)} --file-output={shlex.quote(out)}"
-    run_cmd(cmd, timeout=600)
-    return open(out).read() if os.path.exists(out) else "XSStrike completed."
+    log_output = run_cmd(cmd, timeout=600, capture=True)
+    if os.path.exists(out) and os.path.getsize(out) > 0:
+        with open(out, "r", errors="ignore") as f:
+            return f.read()
+    return log_output or "(XSStrike completed — No vulnerability logs generated)"
 
 def _task_commix(target, work_dir, param_urls):
     out_dir = os.path.join(work_dir, "exploit", "commix")
     target_url = param_urls[0] if param_urls else f"https://{target}/"
     cmd = f"{TOOLS['commix']} --url={shlex.quote(target_url)} --batch --output-dir={shlex.quote(out_dir)}"
-    run_cmd(cmd, timeout=600)
+    log_output = run_cmd(cmd, timeout=600, capture=True)
     log_file = os.path.join(out_dir, "commix_log.txt")
-    return open(log_file).read() if os.path.exists(log_file) else "Commix completed."
+    if os.path.exists(log_file) and os.path.getsize(log_file) > 0:
+        with open(log_file, "r", errors="ignore") as f:
+            return f.read()
+    return log_output or "(Commix completed — No vulnerability logs generated)"
 
 def _task_hydra(target, work_dir, login_urls):
     out = os.path.join(work_dir, "exploit", "hydra.txt")
@@ -2001,8 +2049,11 @@ def _task_hydra(target, work_dir, login_urls):
     login_path = re.sub(r'https?://[^/]+', '', login_url) or "/login"
     
     cmd = f"{TOOLS['hydra']} -L {shlex.quote(user_wl)} -P {shlex.quote(pass_wl)} {shlex.quote(target)} http-post-form '{shlex.quote(login_path)}:user=^USER^&pass=^PASS^:F=incorrect' -o {shlex.quote(out)} -t 4 -W 2"
-    run_cmd(cmd, timeout=600)
-    return open(out).read() if os.path.exists(out) else "Hydra completed."
+    log_output = run_cmd(cmd, timeout=600, capture=True)
+    if os.path.exists(out) and os.path.getsize(out) > 0:
+        with open(out, "r", errors="ignore") as f:
+            return f.read()
+    return log_output or "(Hydra completed — No vulnerability logs generated)"
 
 def phase_exploitation(target, work_dir, max_workers=3):
     print_phase_header(4, "VULNERABILITY VERIFICATION & EXPLOITATION")
@@ -2135,6 +2186,9 @@ def main():
         duration = (datetime.now() - start_time).total_seconds()
         report_data["duration"] = duration
         pdf_created = write_pdf_report(report_data, temp_work_dir, pdf_target_path, company=company, show_creds=show_creds)
+
+        # Display terminal logs summary briefing
+        print_terminal_logs_summary(report_data)
 
         print(f"  {GREEN}┌── [ EXECUTIVE SECURITY AUDIT COMPLETED ] ──────────────────────────────────────────┐{RESET}")
         print(f"  {GREEN}│{RESET}  {BOLD}Target Domain{RESET}       : {CYAN}{target}{RESET}")
