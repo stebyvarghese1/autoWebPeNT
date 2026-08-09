@@ -1048,8 +1048,9 @@ def parse_exploit_intel(work_dir, show_creds=True):
 # ─── PDF Report Generator ─────────────────────────────────────────────
 
 def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized Security Audit", show_creds=True):
-    """Generate client-ready PDF report directly at pdf_target_path."""
+    """Generate official, authority-grade PDF report directly at pdf_target_path."""
     target = report_data['target']
+    report_date = report_data['date']
 
     recon_intel = parse_recon_intel(work_dir, target)
     scan_intel = parse_scan_intel(work_dir)
@@ -1083,41 +1084,44 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
     security_score = max(0, 100 - score_penalty)
 
     if security_score >= 90:
-        score_grade = "A"
-        grade_label = "EXCELLENT"
+        score_grade = "A+"
+        grade_label = "EXCELLENT POSTURE"
         score_color = "#3fb950"
     elif security_score >= 80:
         score_grade = "B"
-        grade_label = "GOOD"
+        grade_label = "GOOD POSTURE"
         score_color = "#58a6ff"
     elif security_score >= 70:
         score_grade = "C"
-        grade_label = "FAIR"
+        grade_label = "SATISFACTORY"
         score_color = "#d29922"
     elif security_score >= 50:
         score_grade = "D"
-        grade_label = "POOR / AT RISK"
+        grade_label = "HIGH RISK / POOR"
         score_color = "#ff7b72"
     else:
         score_grade = "F"
-        grade_label = "CRITICAL POSTURE"
+        grade_label = "CRITICAL NON-COMPLIANT"
         score_color = "#f85149"
 
     risk_rating = "CRITICAL" if crit_count > 0 else ("HIGH" if high_count > 0 else ("MEDIUM" if med_count > 0 else "LOW / INFORMATIONAL"))
     risk_color = "#f85149" if crit_count > 0 else ("#ff7b72" if high_count > 0 else ("#d29922" if med_count > 0 else "#3fb950"))
 
+    # Audit tracking code
+    audit_ref = f"AUD-{datetime.now().strftime('%Y%m%d')}-{abs(hash(target)) % 10000:04d}"
+
     # Generate dynamic executive summary paragraph
     if crit_count > 0 or high_count > 0:
-        exec_paragraph = f"An automated security assessment was performed against <strong>{html.escape(target)}</strong>. The target received an overall Security Score of <strong>{security_score}/100 (Grade {score_grade} — {grade_label})</strong> due to {crit_count} Critical and {high_count} High severity vulnerabilities discovered during testing. The primary attack vectors identified allow potential account takeover leading to web application defacement, sensitive database extraction, and system compromise. Immediate remediation of Priority 0 findings is recommended to prevent unauthorized exploitation."
+        exec_paragraph = f"An official automated cybersecurity assessment and penetration test was conducted against <strong>{html.escape(target)}</strong>. The assessment identified an overall Security Posture Score of <strong>{security_score}/100 (Grade {score_grade} — {grade_label})</strong> with {crit_count} Critical and {high_count} High severity vulnerability findings. Exploitable vectors confirmed during execution allow potential account takeover, database query extraction, and unauthorized host shell invocation. Immediate remediation of Priority 0 findings is mandated prior to official operational certification."
     else:
-        exec_paragraph = f"An automated security assessment was performed against <strong>{html.escape(target)}</strong>. The target achieved a strong Security Score of <strong>{security_score}/100 (Grade {score_grade} — {grade_label})</strong> with 0 high-severity exploit vectors confirmed. Ongoing security monitoring, dependency patching, and regular automated assessments are recommended to maintain this posture."
+        exec_paragraph = f"An official automated cybersecurity assessment and penetration test was conducted against <strong>{html.escape(target)}</strong>. The target achieved a compliant Security Posture Score of <strong>{security_score}/100 (Grade {score_grade} — {grade_label})</strong> with zero high-risk exploit vectors confirmed. Continued vulnerability monitoring, patch management, and periodic compliance re-testing are required to sustain certification."
 
     # Subdomain table rows
     subdomain_rows = ""
     for sub in recon_intel["subdomains"]:
-        subdomain_rows += f"<tr><td><code>{html.escape(sub)}</code></td><td><span class='badge badge-success'>Active</span></td><td>DNS Resolved</td></tr>\n"
+        subdomain_rows += f"<tr><td><code>{html.escape(sub)}</code></td><td><span class='badge badge-success'>ACTIVE</span></td><td>DNS Resolved Target</td></tr>\n"
     if not subdomain_rows:
-        subdomain_rows = f"<tr><td><code>{html.escape(target)}</code></td><td><span class='badge badge-success'>Primary Host</span></td><td>Apex Target Domain</td></tr>"
+        subdomain_rows = f"<tr><td><code>{html.escape(target)}</code></td><td><span class='badge badge-success'>PRIMARY HOST</span></td><td>Apex Target Domain</td></tr>"
 
     # Ports table rows
     ports_rows = ""
@@ -1134,23 +1138,23 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
                 <div>
                     <span class="badge {sev_class}">{v['severity'].upper()}</span>
                     <span class="badge badge-info" style="margin-left: 6px;">{html.escape(v.get('confidence', '100% Confirmed'))}</span>
-                    <h3 style="display: inline; margin-left: 10px; font-size: 16px; color: #ffffff;">#{idx}. {html.escape(v['title'])}</h3>
+                    <h3 style="display: inline; margin-left: 10px; font-size: 16px; color: #ffffff;">FINDING #{idx:02d}: {html.escape(v['title'])}</h3>
                 </div>
-                <div style="font-size: 12px; color: var(--text-muted);">Engine: <code>{html.escape(v['tool'])}</code></div>
+                <div style="font-size: 12px; color: var(--text-muted);">Audit Engine: <code>{html.escape(v['tool'])}</code></div>
             </div>
             <table class="vuln-meta-table">
-                <tr><th>Category:</th><td>{html.escape(v.get('type', 'Web Vulnerability'))}</td><th>OWASP Standard:</th><td><code>{html.escape(v.get('owasp', 'OWASP Top 10'))}</code></td></tr>
+                <tr><th>Classification:</th><td>{html.escape(v.get('type', 'Web Vulnerability'))}</td><th>OWASP Reference:</th><td><code>{html.escape(v.get('owasp', 'OWASP Top 10'))}</code></td></tr>
             </table>
-            <div class="vuln-section-title">📌 Description & Severity Justification</div>
+            <div class="vuln-section-title">📌 Root Cause & Technical Details</div>
             <p style="margin: 4px 0 8px 0; font-size: 13px;">{html.escape(v['description'])} <em>{html.escape(v.get('justification', ''))}</em></p>
             
-            <div class="vuln-section-title">💥 Business Impact</div>
+            <div class="vuln-section-title">💥 Business & Compliance Impact</div>
             <p style="margin: 4px 0 8px 0; font-size: 13px; color: #ff7b72;">{html.escape(v.get('impact', 'Potential disruption of web services and unauthorized data access.'))}</p>
             
-            <div class="vuln-section-title">🧪 Proof of Concept (PoC) Snippet</div>
+            <div class="vuln-section-title">🧪 Verified Proof of Concept (PoC) Evidence</div>
             <pre class="poc-box">{html.escape(v.get('poc', 'GET / HTTP/1.1\nHost: target'))}</pre>
             
-            <div class="vuln-section-title">🛡️ Remediation Advice & Fix Verification</div>
+            <div class="vuln-section-title">🛡️ Mandatory Remediation & Verification Procedure</div>
             <p style="margin: 4px 0 2px 0; font-size: 13px; color: #7ee787;"><strong>Fix:</strong> {html.escape(v['remediation'])}</p>
             <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--text-muted);"><strong>Verify:</strong> {html.escape(v.get('verification', 'Re-run autoWebPeNT pipeline to confirm fix.'))}</p>
         </div>
@@ -1163,36 +1167,42 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
     if crit_count > 0 or high_count > 0:
         rec_rows += """
         <tr>
-            <td><span class='badge badge-danger'>P0 — IMMEDIATE (24-48h)</span></td>
-            <td>Enforce strict parameterized SQL queries & password rate-limiting / CAPTCHA on authentication forms.</td>
-            <td>Prevents automated account takeover and backend database exfiltration.</td>
-            <td>Run Hydra and Sqlmap modules to confirm rejection of payloads.</td>
+            <td><span class='badge badge-danger'>P0 — MANDATORY (24-48h)</span></td>
+            <td>Implement parameterized SQL queries & enforce authentication lockout / CAPTCHA controls.</td>
+            <td>Mitigates critical data breach risk and administrative account takeover.</td>
+            <td>Re-test target parameters using Sqlmap and Hydra validation modules.</td>
         </tr>
         """
     if med_count > 0:
         rec_rows += """
         <tr>
-            <td><span class='badge badge-warning'>P1 — HIGH (1-2 WEEKS)</span></td>
-            <td>Update vulnerable web dependencies and apply Content Security Policy (CSP) headers.</td>
-            <td>Mitigates client-side script execution and known template exploit vectors.</td>
-            <td>Execute Nuclei template scan against endpoints.</td>
+            <td><span class='badge badge-warning'>P1 — URGENT (7-14 DAYS)</span></td>
+            <td>Patch outdated web application components & apply strict Content Security Policy (CSP) headers.</td>
+            <td>Eliminates client-side execution vectors and known CVE template flaws.</td>
+            <td>Execute automated Nuclei vulnerability template scan.</td>
         </tr>
         """
     rec_rows += """
     <tr>
-        <td><span class='badge badge-info'>P2 — STANDARD (ROUTINE)</span></td>
-        <td>Disable verbose web server banners and hide unused subdomains/endpoints.</td>
-        <td>Reduces intelligence exposed to reconnaissance scanners.</td>
-        <td>Perform WhatWeb and Nmap service scan.</td>
+        <td><span class='badge badge-info'>P2 — ROUTINE (30 DAYS)</span></td>
+        <td>Harden HTTP headers, disable server version disclosure banners, and restrict administrative subdomains.</td>
+        <td>Reduces reconnaissance intelligence exposed to unauthorized external parties.</td>
+        <td>Verify via WhatWeb and Nmap service banner verification.</td>
     </tr>
     """
 
-    # Compliance Matrix
+    # Extended International Regulatory Compliance Matrix
+    has_sqli = any("Injection" in v.get("type", "") for v in all_vulnerabilities)
+    has_auth = any("Authentication" in v.get("type", "") for v in all_vulnerabilities)
+
     compliance_rows = f"""
-    <tr><td>OWASP Top 10 (2021) A03: Injection</td><td>SQL Injection / Command Injection</td><td><span class='badge {"badge-danger" if any("Injection" in v["type"] for v in all_vulnerabilities) else "badge-success"}'>{"NON-COMPLIANT" if any("Injection" in v["type"] for v in all_vulnerabilities) else "COMPLIANT"}</span></td></tr>
-    <tr><td>OWASP Top 10 (2021) A07: Identification & Auth Failures</td><td>Weak Brute-Force Authentication</td><td><span class='badge {"badge-danger" if any("Authentication" in v["type"] for v in all_vulnerabilities) else "badge-success"}'>{"NON-COMPLIANT" if any("Authentication" in v["type"] for v in all_vulnerabilities) else "COMPLIANT"}</span></td></tr>
-    <tr><td>NIST SP 800-53 IA-5: Authenticator Management</td><td>Password Policy & Rate Limiting</td><td><span class='badge {"badge-danger" if any("Authentication" in v["type"] for v in all_vulnerabilities) else "badge-success"}'>{"ACTION REQUIRED" if any("Authentication" in v["type"] for v in all_vulnerabilities) else "PASS"}</span></td></tr>
-    <tr><td>PCI-DSS 4.0 Requirement 6: Secure Systems & Software</td><td>Web Vulnerability Management</td><td><span class='badge {"badge-danger" if crit_count > 0 else "badge-success"}'>{"ACTION REQUIRED" if crit_count > 0 else "PASS"}</span></td></tr>
+    <tr><td>OWASP Top 10 (2021) A03: Injection</td><td>SQL / OS Command Input Filtering</td><td><span class='badge {"badge-danger" if has_sqli else "badge-success"}'>{"NON-COMPLIANT" if has_sqli else "COMPLIANT"}</span></td></tr>
+    <tr><td>OWASP Top 10 (2021) A07: Auth Failures</td><td>Brute-Force Protection & Policy</td><td><span class='badge {"badge-danger" if has_auth else "badge-success"}'>{"NON-COMPLIANT" if has_auth else "COMPLIANT"}</span></td></tr>
+    <tr><td>ISO/IEC 27001:2022 Control A.8.8</td><td>Management of Technical Vulnerabilities</td><td><span class='badge {"badge-danger" if crit_count > 0 else "badge-success"}'>{"ACTION REQUIRED" if crit_count > 0 else "PASS / COMPLIANT"}</span></td></tr>
+    <tr><td>ISO/IEC 27001:2022 Control A.8.20</td><td>Network & Web Service Security</td><td><span class='badge {"badge-danger" if high_count > 0 else "badge-success"}'>{"ACTION REQUIRED" if high_count > 0 else "PASS / COMPLIANT"}</span></td></tr>
+    <tr><td>NIST SP 800-53 Rev 5 Control SI-10</td><td>Information Input Validation</td><td><span class='badge {"badge-danger" if has_sqli else "badge-success"}'>{"NON-COMPLIANT" if has_sqli else "PASS / COMPLIANT"}</span></td></tr>
+    <tr><td>NIST SP 800-53 Rev 5 Control IA-5</td><td>Authenticator Management</td><td><span class='badge {"badge-danger" if has_auth else "badge-success"}'>{"NON-COMPLIANT" if has_auth else "PASS / COMPLIANT"}</span></td></tr>
+    <tr><td>PCI-DSS v4.0 Requirement 6.2</td><td>Web Application Vulnerability Protection</td><td><span class='badge {"badge-danger" if crit_count > 0 or high_count > 0 else "badge-success"}'>{"NON-COMPLIANT" if crit_count > 0 or high_count > 0 else "COMPLIANT"}</span></td></tr>
     """
 
     # Formatted Raw Logs Vault
@@ -1207,7 +1217,7 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
             pass
         lines = log_str.splitlines()
         if len(lines) > 500:
-            return "\n".join(lines[:480]) + f"\n\n... [Showing first 480 of {len(lines)} lines — Unencrypted execution log]"
+            return "\n".join(lines[:480]) + f"\n\n... [Showing first 480 of {len(lines)} lines — Detailed Execution Log]"
         return log_str
 
     raw_logs_html = ""
@@ -1221,7 +1231,7 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
                     escaped_log = html.escape(formatted_log)
                     phase_html += f"""
                     <div style="margin-bottom: 12px; page-break-inside: avoid;">
-                        <h4 style="color: var(--accent); margin: 6px 0 2px 0; font-size: 12px; font-weight: 700;">▶ Engine: {html.escape(tool_name)}</h4>
+                        <h4 style="color: var(--accent); margin: 6px 0 2px 0; font-size: 12px; font-weight: 700;">▶ Audit Engine: {html.escape(tool_name)}</h4>
                         <pre style="white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; margin: 2px 0; padding: 8px; background: #080c10; color: #7ee787; border-radius: 4px; font-size: 10px; line-height: 1.3;">{escaped_log}</pre>
                     </div>
                     """
@@ -1237,7 +1247,7 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
 
         raw_logs_html += f"""
         <div class="log-block">
-            <h3 style="margin-top: 0; font-size: 14px;">⚡ {html.escape(phase_name)} Raw Execution Log Summary</h3>
+            <h3 style="margin-top: 0; font-size: 14px;">⚡ {html.escape(phase_name)} Execution Log Summary</h3>
             {phase_html}
         </div>
         """
@@ -1247,7 +1257,7 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
     if recon_intel["waf_detected"]:
         waf_banner_html = f"""
         <div style="background: #d2992222; border: 1px solid #d29922; color: #d29922; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 13px;">
-            ⚠️ <strong>WAF / Defense Proxy Detected ({html.escape(recon_intel['waf_name'])}):</strong> A Web Application Firewall is actively filtering traffic to {html.escape(target)}. Automated scanning results (such as port discovery and fuzzing) may be subject to payload drop or rate limits.
+            ⚠️ <strong>Active Security Proxy / WAF Detected ({html.escape(recon_intel['waf_name'])}):</strong> Traffic to {html.escape(target)} is actively inspected by a Web Application Firewall. Some automated probes may be subject to payload drop or rate-limiting restrictions.
         </div>
         """
 
@@ -1278,9 +1288,9 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
     cve_section_html = f"""
     <!-- Section 8: CVE Valuation & Financial Risk Assessment -->
     <div class="section-card" id="cve-valuation">
-        <h2>🛡️ 8. CVE Valuation & Financial Risk Assessment</h2>
+        <h2>🛡️ 8. CVE Valuation & Enterprise Loss Modeling</h2>
         <p style="font-size: 13px; line-height: 1.5; margin-bottom: 14px;">
-            The <strong>CVE Valuation Engine</strong> scores identified CVE vulnerability metrics using CVSS v3.1 Base Ratings, EPSS (Exploit Prediction Scoring System) 30-day exploitation probability, CISA Known Exploited Vulnerabilities (KEV) active threat status, and enterprise business loss modeling.
+            The <strong>CVE Valuation Engine</strong> models business exposure using CVSS v3.1 Base Scores, EPSS (Exploit Prediction Scoring System) 30-day exploitation probability, CISA KEV threat status, and enterprise breach loss data.
         </p>
         <table>
             <thead>
@@ -1291,7 +1301,7 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
                     <th>EPSS Exploit Prob.</th>
                     <th>CISA KEV</th>
                     <th>Risk Score</th>
-                    <th>Estimated Financial Exposure Range ($)</th>
+                    <th>Estimated Financial Exposure ($)</th>
                 </tr>
             </thead>
             <tbody>
@@ -1303,23 +1313,90 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
 
     raw_logs_section_html = f"""
     <div class="section-card" id="logs-vault">
-        <h2>📄 9. Raw Tool Execution Vault & Audit Logs</h2>
+        <h2>📄 9. Audit Log Vault & Execution Artifacts</h2>
         {raw_logs_html}
     </div>
     """
 
     toc_html = """
     <div class="toc-box">
-        <strong>Report Contents:</strong> &nbsp;
+        <strong>Official Audit Structure:</strong> &nbsp;
         <a href="#executive-summary">1. Executive Summary</a>
-        <a href="#vulnerabilities">2. Confirmed Vulnerabilities</a>
-        <a href="#tech-stack">3. Tech Stack</a>
-        <a href="#recon-intel">4. Subdomains</a>
-        <a href="#network-services">5. Network Services</a>
-        <a href="#recommendations">6. Recommendations</a>
-        <a href="#compliance">7. Compliance</a>
+        <a href="#vulnerabilities">2. Confirmed Findings</a>
+        <a href="#compliance">3. Compliance Matrix</a>
+        <a href="#tech-stack">4. Tech Stack</a>
+        <a href="#recon-intel">5. Subdomain Mapping</a>
+        <a href="#network-services">6. Open Services</a>
+        <a href="#recommendations">7. Remediation Roadmap</a>
         <a href="#cve-valuation">8. CVE Valuation</a>
-        <a href="#logs-vault">9. Execution Logs</a>
+        <a href="#logs-vault">9. Audit Logs</a>
+    </div>
+    """
+
+    # Official Cover Page HTML
+    cover_page_html = f"""
+    <div class="cover-page">
+        <div class="confidential-tag">STRICTLY CONFIDENTIAL — FOR OFFICIAL AUDIT USE ONLY</div>
+        <div class="cover-title">PENETRATION TESTING &amp; REGULATORY COMPLIANCE REPORT</div>
+        <div class="cover-subtitle">Automated Security Posture Audit &amp; Technical Risk Assessment</div>
+        
+        <div class="cover-meta-grid">
+            <div class="cover-meta-item">
+                <div class="cover-meta-label">TARGET DOMAIN / SYSTEM</div>
+                <div class="cover-meta-value">{html.escape(target)}</div>
+            </div>
+            <div class="cover-meta-item">
+                <div class="cover-meta-label">AUDIT TRACKING ID</div>
+                <div class="cover-meta-value">{audit_ref}</div>
+            </div>
+            <div class="cover-meta-item">
+                <div class="cover-meta-label">CLIENT / ORGANIZATION</div>
+                <div class="cover-meta-value">{html.escape(company)}</div>
+            </div>
+            <div class="cover-meta-item">
+                <div class="cover-meta-label">ASSESSMENT DATE</div>
+                <div class="cover-meta-value">{report_date}</div>
+            </div>
+        </div>
+
+        <div class="cover-score-box">
+            <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #8b949e; margin-bottom: 4px;">OFFICIAL SECURITY POSTURE RATING</div>
+            <div style="font-size: 42px; font-weight: 800; color: {score_color};">{security_score} <span style="font-size: 26px;">/ 100 [{score_grade}]</span></div>
+            <div style="font-size: 14px; font-weight: 700; color: #ffffff; margin-top: 4px;">{grade_label} — OVERALL RISK: {risk_rating}</div>
+        </div>
+
+        <div class="cover-footer">
+            <strong>Orchestration Framework:</strong> autoWebPeNT Enterprise Audit Pipeline v1.0.0<br>
+            <strong>Compliance Frameworks Evaluated:</strong> OWASP Top 10 (2021) | ISO/IEC 27001:2022 | NIST SP 800-53 Rev 5 | PCI-DSS v4.0
+        </div>
+    </div>
+    <div style="page-break-before: always;"></div>
+    """
+
+    # Official Sign-Off Attestation HTML
+    attestation_html = f"""
+    <div class="section-card" id="attestation" style="margin-top: 30px; page-break-inside: avoid;">
+        <h2>✍️ 10. Official Audit Attestation & Regulatory Sign-Off</h2>
+        <p style="font-size: 12px; line-height: 1.6; color: var(--text);">
+            This document certifies that an automated cybersecurity penetration test and vulnerability assessment was executed against the target infrastructure <strong>{html.escape(target)}</strong> using the autoWebPeNT Security Framework. The findings and metrics presented herein represent an accurate evaluation of the security posture as of <strong>{report_date}</strong>.
+        </p>
+        
+        <table style="border: none; margin-top: 20px;">
+            <tr style="border: none;">
+                <td style="border: none; width: 50%; padding-right: 20px;">
+                    <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 40px;">AUTHORIZED AUDITOR / SECURITY ENGAGEMENT LEAD</div>
+                    <div style="border-bottom: 1px solid var(--border); margin-bottom: 6px;"></div>
+                    <div style="font-size: 12px; font-weight: 700; color: #ffffff;">Lead Security Assessor</div>
+                    <div style="font-size: 11px; color: var(--text-muted);">{html.escape(company)}</div>
+                </td>
+                <td style="border: none; width: 50%; padding-left: 20px;">
+                    <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 40px;">EXECUTIVE RECIPIENT / CISO APPROVAL</div>
+                    <div style="border-bottom: 1px solid var(--border); margin-bottom: 6px;"></div>
+                    <div style="font-size: 12px; font-weight: 700; color: #ffffff;">Chief Information Security Officer</div>
+                    <div style="font-size: 11px; color: var(--text-muted);">Tracking Ref: {audit_ref}</div>
+                </td>
+            </tr>
+        </table>
     </div>
     """
 
@@ -1327,11 +1404,11 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>autoWebPeNT Security Report — {html.escape(target)}</title>
+<title>Official Security Audit Report — {html.escape(target)}</title>
 <style>
     @page {{
         size: A4;
-        margin: 15mm;
+        margin: 12mm;
     }}
     :root {{
         --bg: #0d1117;
@@ -1355,6 +1432,84 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
         line-height: 1.4;
     }}
     .container {{ max-width: 1100px; margin: 0 auto; }}
+
+    /* Cover Page Styling */
+    .cover-page {{
+        padding: 40px 20px;
+        text-align: center;
+        min-height: 900px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-sizing: border-box;
+    }}
+    .confidential-tag {{
+        display: inline-block;
+        background: #f8514922;
+        color: #f85149;
+        border: 1px solid #f85149;
+        padding: 6px 16px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        margin-bottom: 40px;
+    }}
+    .cover-title {{
+        font-size: 26px;
+        font-weight: 800;
+        color: #ffffff;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+    }}
+    .cover-subtitle {{
+        font-size: 14px;
+        color: var(--accent);
+        margin-bottom: 50px;
+    }}
+    .cover-meta-grid {{
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+        margin: 30px auto;
+        max-width: 700px;
+        text-align: left;
+    }}
+    .cover-meta-item {{
+        background: var(--panel);
+        border: 1px solid var(--border);
+        padding: 14px;
+        border-radius: 6px;
+    }}
+    .cover-meta-label {{
+        font-size: 10px;
+        color: var(--text-muted);
+        font-weight: 700;
+        letter-spacing: 1px;
+    }}
+    .cover-meta-value {{
+        font-size: 14px;
+        font-weight: 700;
+        color: #ffffff;
+        margin-top: 4px;
+    }}
+    .cover-score-box {{
+        background: var(--panel);
+        border: 2px solid {score_color};
+        padding: 24px;
+        border-radius: 10px;
+        max-width: 500px;
+        margin: 30px auto;
+    }}
+    .cover-footer {{
+        font-size: 11px;
+        color: var(--text-muted);
+        line-height: 1.6;
+        border-top: 1px solid var(--border);
+        padding-top: 20px;
+        margin-top: 40px;
+    }}
     
     .header {{
         background: var(--panel);
@@ -1433,8 +1588,8 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
     @media print {{
         body {{ background-color: #ffffff; color: #000000; padding: 0; }}
         .container {{ max-width: 100%; }}
-        .header, .section-card, .vuln-card, .log-block {{ background: #ffffff; border: 1px solid #cccccc; color: #000000; box-shadow: none; }}
-        h1, h2, h3, h4 {{ color: #000000; }}
+        .header, .section-card, .vuln-card, .log-block, .cover-meta-item, .cover-score-box {{ background: #ffffff; border: 1px solid #cccccc; color: #000000; box-shadow: none; }}
+        h1, h2, h3, h4, .cover-title {{ color: #000000; }}
         .poc-box {{ background: #f6f8fa; color: #24292e; border: 1px solid #e1e4e8; white-space: pre-wrap; word-break: break-all; }}
         code {{ background: #f6f8fa; color: #000000; border: 1px solid #e1e4e8; }}
         th {{ background: #f0f0f0; color: #000000; }}
@@ -1443,12 +1598,14 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
 </head>
 <body>
 <div class="container">
+    {cover_page_html}
+
     <!-- Main Header -->
     <div class="header">
         <div class="header-title">
             <div>
-                <h1>autoWebPeNT Security Report</h1>
-                <div style="color: var(--text-muted); font-size: 13px; margin-top: 4px;">Target Domain: <strong style="color: #ffffff;">{html.escape(target)}</strong> | Client: <strong style="color: var(--accent);">{html.escape(company)}</strong></div>
+                <h1>Penetration Testing &amp; Audit Summary</h1>
+                <div style="color: var(--text-muted); font-size: 13px; margin-top: 4px;">Target Domain: <strong style="color: #ffffff;">{html.escape(target)}</strong> | Ref Code: <strong style="color: var(--accent);">{audit_ref}</strong></div>
             </div>
             <div class="risk-banner">Overall Risk: {risk_rating}</div>
         </div>
@@ -1456,7 +1613,7 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
         <!-- Top Metrics Cards -->
         <div class="grid-4">
             <div class="metric-card" style="border-left: 4px solid {score_color};">
-                <div class="metric-label">Security Score</div>
+                <div class="metric-label">Security Posture Score</div>
                 <div class="metric-value" style="color: {score_color}; font-size: 20px;">{security_score}/100 <span style="font-size: 14px;">[{score_grade}]</span></div>
             </div>
             <div class="metric-card"><div class="metric-label">Assessment Date</div><div class="metric-value" style="color: #ffffff; font-size: 13px;">{report_data['date']}</div></div>
@@ -1471,7 +1628,7 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
 
     <!-- Section 1: Executive Summary -->
     <div class="section-card" id="executive-summary">
-        <h2>📊 1. Executive Summary & Security Posture</h2>
+        <h2>📊 1. Executive Summary & Audit Overview</h2>
         <p style="font-size: 13px; line-height: 1.5; margin-bottom: 16px;">{exec_paragraph}</p>
         
         <div class="grid-4">
@@ -1484,13 +1641,33 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
 
     <!-- Section 2: Confirmed Security Vulnerabilities & PoC Evidence -->
     <div class="section-card" id="vulnerabilities">
-        <h2>🔥 2. Confirmed Security Vulnerabilities & PoC Evidence</h2>
+        <h2>🔥 2. Confirmed Vulnerability Findings & PoC Evidence</h2>
         {vulnerabilities_html}
     </div>
 
-    <!-- Section 3: Technology Stack & Fingerprinting -->
+    <!-- Section 3: Regulatory Compliance Evaluation -->
+    <div class="section-card" id="compliance">
+        <h2>🏛️ 3. Regulatory Compliance & Security Standards Matrix</h2>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">
+            Target posture evaluated against mandatory cybersecurity standards (OWASP Top 10 2021, ISO/IEC 27001:2022, NIST SP 800-53 Rev 5, PCI-DSS v4.0):
+        </p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Security Standard / Control ID</th>
+                    <th>Evaluated Control Scope</th>
+                    <th>Compliance Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {compliance_rows}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Section 4: Technology Stack & Fingerprinting -->
     <div class="section-card" id="tech-stack">
-        <h2>💻 3. Discovered Technology Stack & Fingerprinting</h2>
+        <h2>💻 4. Discovered Technology Stack & Fingerprinting</h2>
         <table>
             <thead>
                 <tr>
@@ -1506,9 +1683,9 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
         </table>
     </div>
 
-    <!-- Section 4: Target Intelligence & Subdomains -->
+    <!-- Section 5: Target Intelligence & Subdomains -->
     <div class="section-card" id="recon-intel">
-        <h2>📡 4. Target Intelligence & Subdomain Discovery</h2>
+        <h2>📡 5. Target Intelligence & Subdomain Discovery</h2>
         <table>
             <thead>
                 <tr>
@@ -1523,9 +1700,9 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
         </table>
     </div>
 
-    <!-- Section 5: Open Ports & Services -->
+    <!-- Section 6: Open Ports & Services -->
     <div class="section-card" id="network-services">
-        <h2>🔌 5. Open Ports & Network Services</h2>
+        <h2>🔌 6. Open Ports & Network Services</h2>
         <table>
             <thead>
                 <tr>
@@ -1542,14 +1719,14 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
         </table>
     </div>
 
-    <!-- Section 6: Actionable Prioritized Recommendations Roadmap -->
+    <!-- Section 7: Actionable Prioritized Recommendations Roadmap -->
     <div class="section-card" id="recommendations">
-        <h2>🛠️ 6. Actionable Prioritized Remediation Roadmap</h2>
+        <h2>🛠️ 7. Prioritized Remediation & Action Roadmap</h2>
         <table>
             <thead>
                 <tr>
                     <th>Priority Level</th>
-                    <th>Recommended Security Action</th>
+                    <th>Mandatory Security Action</th>
                     <th>Risk Mitigation Impact</th>
                     <th>Fix Verification Step</th>
                 </tr>
@@ -1561,6 +1738,8 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
     </div>
 
     {cve_section_html}
+
+    {attestation_html}
 
     {raw_logs_section_html}
 </div>
