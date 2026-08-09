@@ -3,14 +3,20 @@
 autowebpnt \- Automated Web Penetration Testing Framework
 .SH SYNOPSIS
 .B autowebpnt
-\-d \fIDOMAIN\fR [\fIOPTIONS\fR]
+[\-d \fIDOMAIN\fR] [\-\-cve \fICVE_ID\fR] [\-\-cve-file \fIFILE\fR] [\fIOPTIONS\fR]
 .SH DESCRIPTION
 .B autoWebPeNT
-is an automated web penetration testing framework designed for Kali Linux. It orchestrates 15+ industry standard security tools across four sequential phases: Reconnaissance, Port Scanning, Web Enumeration, and Vulnerability Exploitation. Output is generated as a client-ready executive PDF report (e.g., autowebpnt_report_example_com_YYYYMMDD_HHMMSS.pdf).
+is an automated web penetration testing framework designed for Kali Linux. It orchestrates 15+ industry standard security tools across four sequential phases: Reconnaissance, Port Scanning, Web Enumeration, and Vulnerability Exploitation. It also includes a standalone CVE Valuation Engine to calculate financial risk and exploit probabilities. Output is generated as a client-ready executive PDF report (e.g., autowebpnt_report_example_com_YYYYMMDD_HHMMSS.pdf).
 .SH OPTIONS
 .TP
 \fB\-d\fR, \fB\-\-domain\fR \fIDOMAIN\fR
-Target domain to assess (e.g., example.com). Required.
+Target domain to assess (e.g., example.com). Required unless \-\-cve or \-\-cve-file is used.
+.TP
+\fB\-\-cve\fR \fICVE_ID\fR
+Evaluate single or comma-separated CVE IDs (e.g., CVE-2021-44228) and generate a financial risk valuation.
+.TP
+\fB\-\-cve\-file\fR \fIFILE\fR
+Evaluate a bulk list of CVE IDs from a text file (one CVE per line).
 .TP
 \fB\-\-skip\-recon\fR
 Skip Phase 1: Reconnaissance (Amass, Sublist3r, theHarvester, DNSRecon, WhatWeb).
