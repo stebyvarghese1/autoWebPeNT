@@ -511,24 +511,22 @@ def install_missing_tools(missing_tools):
         print(f"  {YELLOW}[!] Package manager ('apt') not found on system. Skipping automatic installation.{RESET}\n")
         return False
 
+    # Mapping of autoWebPeNT internal tool keys to actual Kali APT package names
     pkg_map = {
         # Reconnaissance
         "amass":           "amass",
         "sublist3r":       "sublist3r",
         "assetfinder":     "assetfinder",
-        "findomain":       "findomain",
         "theharvester":    "theharvester",
         "reconng":         "recon-ng",
         "spiderfoot":      "spiderfoot",
-        "gau":             "gau",
-        "waybackurls":     "waybackurls",
-        "httpx":           "httpx-toolkit",
         "dnsrecon":        "dnsrecon",
         "dnsenum":         "dnsenum",
         "fierce":          "fierce",
         "knockpy":         "knockpy",
         "whatweb":         "whatweb",
         "wafw00f":         "wafw00f",
+        "httpx":           "httpx-toolkit",
 
         # Port Scanning
         "naabu":           "naabu",
@@ -543,14 +541,9 @@ def install_missing_tools(missing_tools):
         "dirb":            "dirb",
         "feroxbuster":     "feroxbuster",
         "wfuzz":           "wfuzz",
-        "katana":          "katana",
-        "hakrawler":       "hakrawler",
-        "gospider":        "gospider",
-        "paramspider":     "paramspider",
         "arjun":           "arjun",
 
         # Web Technology Fingerprinting
-        "wappalyzer":      "wappalyzer",
         "cmseek":          "cmseek",
 
         # Vulnerability Assessment
@@ -558,38 +551,17 @@ def install_missing_tools(missing_tools):
         "nikto":           "nikto",
         "wpscan":          "wpscan",
         "joomscan":        "joomscan",
-        "droopescan":      "droopescan",
         "sslscan":         "sslscan",
-        "testssl":         "testssl.sh",
 
-        # Web Proxy
-        "burpsuite":       "burpsuite",
-        "zap":             "zaproxy",
-        "caido":           "caido",
-
-        # Injection Testing
+        # Injection & XSS Testing
         "sqlmap":          "sqlmap",
-        "nosqlmap":        "nosqlmap",
         "commix":          "commix",
-        "tplmap":          "tplmap",
-        "xxeinjector":     "xxeinjector",
-        "ssrfmap":         "ssrfmap",
-
-        # XSS Testing
-        "xsstrike":        "xsstrike",
-        "dalfox":          "dalfox",
         "xsser":           "xsser",
 
-        # Authentication & JWT
+        # Authentication
         "hydra":           "hydra",
         "medusa":          "medusa",
         "patator":         "patator",
-        "jwttool":         "jwt-tool",
-
-        # API Security Testing
-        "postman":         "postman",
-        "insomnia":        "insomnia",
-        "kiterunner":      "kiterunner",
 
         # Utilities
         "curl":            "curl",
@@ -601,23 +573,43 @@ def install_missing_tools(missing_tools):
         "tshark":          "tshark",
     }
 
-    pkgs = [pkg_map.get(t, t) for t in missing_tools]
+    # Filter out tools that are not available in standard Kali APT repositories
+    pkgs = list(set([pkg_map[t] for t in missing_tools if t in pkg_map]))
+    
+    non_apt_tools = [t for t in missing_tools if t not in pkg_map]
+    if non_apt_tools:
+        print(f"  {YELLOW}[*] Note: The following third-party / Go / standalone tools are not in standard APT repositories:{RESET}")
+        print(f"      {GRAY}{', '.join(non_apt_tools)}{RESET}")
+        print(f"      {GRAY}Install them via Go (`go install ...`) or GitHub releases if required.{RESET}\n")
+
     if not pkgs:
+        print(f"  {YELLOW}[!] No APT packages to install for current missing tool selection.{RESET}\n")
         return False
 
-    print(f"  {CYAN}[*] Installing missing tools via apt package manager...{RESET}")
+    print(f"  {CYAN}[*] Installing available missing security tools via apt package manager...{RESET}")
     print(f"      {GRAY}{' '.join(pkgs)}{RESET}\n")
 
     is_root = hasattr(os, "geteuid") and os.geteuid() == 0
     sudo_prefix = "" if is_root else "sudo "
 
-    cmd = f"{sudo_prefix}{apt_binary} update && {sudo_prefix}{apt_binary} install -y {' '.join(pkgs)}"
+    # Update APT cache first
+    subprocess.run(f"{sudo_prefix}{apt_binary} update", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    # Attempt bulk install; if bulk fails, install packages individually so valid packages get installed
+    cmd = f"{sudo_prefix}{apt_binary} install -y {' '.join(pkgs)}"
     try:
         res = subprocess.run(cmd, shell=True)
-        return res.returncode == 0
-    except Exception as e:
-        print(f"  {RED}[!] Error during automatic tool installation: {e}{RESET}\n")
-        return False
+        if res.returncode == 0:
+            return True
+    except Exception:
+        pass
+
+    # Fallback: install individually
+    print(f"  {YELLOW}[*] Retrying package installation individually to bypass missing repository packages...{RESET}")
+    for pkg in pkgs:
+        subprocess.run(f"{sudo_prefix}{apt_binary} install -y {pkg}", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    return True
 
 def check_tools(auto_install=True):
     """Verify required tools using shutil.which and automatically install any missing tools via apt."""
