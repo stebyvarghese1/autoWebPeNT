@@ -81,6 +81,7 @@
 | 🎯 | **Single-Command Auditing** | Run a full 4-phase audit against target domains with 1 command |
 | ⚡ | **Multi-Threaded Execution** | Concurrent tool execution for maximum speed and throughput |
 | 🛡️ | **15+ Tool Integration** | Seamlessly orchestrates Nmap, RustScan, Nuclei, Sqlmap, XSStrike, etc. |
+| 🛡️ | **CVE Valuation Engine** | Calculates CVSS v3.1, EPSS exploit probability, CISA KEV status & Financial Loss ($) |
 | 📊 | **Executive PDF Generation** | Generates detailed reports complete with risk matrix & remediation steps |
 | ⚖️ | **Compliance Mapping** | Maps findings to OWASP Top 10 (2021), NIST SP 800-53 & PCI-DSS 4.0 |
 | 📦 | **Debian Native Packaging** | Native `.deb` packaging infrastructure & system man page included |
@@ -127,8 +128,8 @@
                                        │
                                        ▼
   ┌─────────────────────────────────────────────────────────────────────────┐
-  │                     EXECUTIVE PDF REPORT GENERATION                     │
-  │      Security Posture · Remediation Roadmap · Compliance Audit Logs     │
+  │              CVE VALUATION & EXECUTIVE PDF REPORT GENERATION             │
+  │    CVSS Score · EPSS Probability · CISA KEV · Financial Loss ($)       │
   └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -154,6 +155,7 @@
 | 🌐 **Phase 2: Scanning** | Network & Port Audit | RustScan · Nmap |
 | 🔎 **Phase 3: Web Enum** | Fingerprint & Vulnerability Scan | Gobuster · FFUF · Nikto · WPScan · WhatWeb · Nuclei |
 | ⚡ **Phase 4: Exploitation** | Automated Exploitation | Sqlmap · XSStrike · Commix · Hydra |
+| 🛡️ **CVE Engine** | Risk & Financial Valuation | FIRST EPSS API · NIST NVD · CISA KEV Catalog |
 | 📄 **Reporting** | PDF Engine | Python 3.8+ · ReportLab · PyPDF2 |
 | 📦 **Deployment** | Packaging | Debian Packaging (`dpkg-buildpackage`) · Linux Man Pages |
 
@@ -208,12 +210,14 @@ python3 autoWebPeNT.py -d example.com
 ### CLI Reference
 
 ```
-Usage: autowebpnt -d <domain> [OPTIONS]
+Usage: autowebpnt [-d <domain>] [--cve CVE_ID] [--cve-file FILE] [OPTIONS]
 
-Required Arguments:
+Target / Mode Selection:
   -d, --domain DOMAIN       Target domain to assess (e.g., example.com)
+  --cve CVE_IDS             Evaluate single or comma-separated CVE IDs (e.g., CVE-2021-44228)
+  --cve-file FILE           Evaluate bulk CVE list from a text file
 
-Optional Arguments:
+Pipeline Control:
   --skip-recon              Skip Phase 1: Reconnaissance (Amass, Sublist3r, theHarvester, etc.)
   --skip-scan               Skip Phase 2: Port Scanning (RustScan, Nmap)
   --skip-web                Skip Phase 3: Web Enumeration (Gobuster, FFUF, Nikto, WPScan, Nuclei)
@@ -234,12 +238,22 @@ Optional Arguments:
 python3 autoWebPeNT.py -d target.com
 ```
 
-**Example 2: High-Speed Custom Audit with Client Branding**
+**Example 2: Standalone CVE Valuation & Financial Risk Lookup**
+```bash
+python3 autoWebPeNT.py --cve CVE-2021-44228,CVE-2023-34362
+```
+
+**Example 3: Bulk CVE List Valuation from File**
+```bash
+python3 autoWebPeNT.py --cve-file cves.txt
+```
+
+**Example 4: High-Speed Custom Audit with Client Branding**
 ```bash
 python3 autoWebPeNT.py -d target.com --threads 5 --company "Acme Security Labs" --no-creds
 ```
 
-**Example 3: Non-Intrusive Scan (Skip Phase 4 Exploitation)**
+**Example 5: Non-Intrusive Scan (Skip Phase 4 Exploitation)**
 ```bash
 python3 autoWebPeNT.py -d target.com --skip-exploit
 ```
