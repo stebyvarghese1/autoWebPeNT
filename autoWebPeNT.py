@@ -1087,25 +1087,31 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
         score_grade = "A+"
         grade_label = "EXCELLENT POSTURE"
         score_color = "#3fb950"
+        score_print_color = "#1a7f37"
     elif security_score >= 80:
         score_grade = "B"
         grade_label = "GOOD POSTURE"
         score_color = "#58a6ff"
+        score_print_color = "#0969da"
     elif security_score >= 70:
         score_grade = "C"
         grade_label = "SATISFACTORY"
         score_color = "#d29922"
+        score_print_color = "#9a6700"
     elif security_score >= 50:
         score_grade = "D"
         grade_label = "HIGH RISK / POOR"
         score_color = "#ff7b72"
+        score_print_color = "#cf222e"
     else:
         score_grade = "F"
         grade_label = "CRITICAL NON-COMPLIANT"
         score_color = "#f85149"
+        score_print_color = "#cf222e"
 
     risk_rating = "CRITICAL" if crit_count > 0 else ("HIGH" if high_count > 0 else ("MEDIUM" if med_count > 0 else "LOW / INFORMATIONAL"))
     risk_color = "#f85149" if crit_count > 0 else ("#ff7b72" if high_count > 0 else ("#d29922" if med_count > 0 else "#3fb950"))
+    risk_print_color = "#cf222e" if crit_count > 0 else ("#cf222e" if high_count > 0 else ("#9a6700" if med_count > 0 else "#1a7f37"))
 
     # Audit tracking code
     audit_ref = f"AUD-{datetime.now().strftime('%Y%m%d')}-{abs(hash(target)) % 10000:04d}"
@@ -1138,7 +1144,7 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
                 <div>
                     <span class="badge {sev_class}">{v['severity'].upper()}</span>
                     <span class="badge badge-info" style="margin-left: 6px;">{html.escape(v.get('confidence', '100% Confirmed'))}</span>
-                    <h3 style="display: inline; margin-left: 10px; font-size: 16px; color: #ffffff;">FINDING #{idx:02d}: {html.escape(v['title'])}</h3>
+                    <h3 style="display: inline; margin-left: 10px; font-size: 16px; color: var(--text);">FINDING #{idx:02d}: {html.escape(v['title'])}</h3>
                 </div>
                 <div style="font-size: 12px; color: var(--text-muted);">Audit Engine: <code>{html.escape(v['tool'])}</code></div>
             </div>
@@ -1149,13 +1155,13 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
             <p style="margin: 4px 0 8px 0; font-size: 13px;">{html.escape(v['description'])} <em>{html.escape(v.get('justification', ''))}</em></p>
             
             <div class="vuln-section-title">💥 Business & Compliance Impact</div>
-            <p style="margin: 4px 0 8px 0; font-size: 13px; color: #ff7b72;">{html.escape(v.get('impact', 'Potential disruption of web services and unauthorized data access.'))}</p>
+            <p style="margin: 4px 0 8px 0; font-size: 13px; color: var(--danger);">{html.escape(v.get('impact', 'Potential disruption of web services and unauthorized data access.'))}</p>
             
             <div class="vuln-section-title">🧪 Verified Proof of Concept (PoC) Evidence</div>
             <pre class="poc-box">{html.escape(v.get('poc', 'GET / HTTP/1.1\nHost: target'))}</pre>
             
             <div class="vuln-section-title">🛡️ Mandatory Remediation & Verification Procedure</div>
-            <p style="margin: 4px 0 2px 0; font-size: 13px; color: #7ee787;"><strong>Fix:</strong> {html.escape(v['remediation'])}</p>
+            <p style="margin: 4px 0 2px 0; font-size: 13px; color: var(--success);"><strong>Fix:</strong> {html.escape(v['remediation'])}</p>
             <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--text-muted);"><strong>Verify:</strong> {html.escape(v.get('verification', 'Re-run autoWebPeNT pipeline to confirm fix.'))}</p>
         </div>
         """
@@ -1232,7 +1238,7 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
                     phase_html += f"""
                     <div style="margin-bottom: 12px; page-break-inside: avoid;">
                         <h4 style="color: var(--accent); margin: 6px 0 2px 0; font-size: 12px; font-weight: 700;">▶ Audit Engine: {html.escape(tool_name)}</h4>
-                        <pre style="white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; margin: 2px 0; padding: 8px; background: #080c10; color: #7ee787; border-radius: 4px; font-size: 10px; line-height: 1.3;">{escaped_log}</pre>
+                        <pre>{escaped_log}</pre>
                     </div>
                     """
         else:
@@ -1240,7 +1246,7 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
             if log_str:
                 formatted_log = format_log_output(log_str)
                 escaped_log = html.escape(formatted_log)
-                phase_html += f'<pre style="white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; margin: 2px 0; padding: 8px; background: #080c10; color: #7ee787; border-radius: 4px; font-size: 10px; line-height: 1.3;">{escaped_log}</pre>'
+                phase_html += f'<pre>{escaped_log}</pre>'
 
         if not phase_html:
             phase_html = '<p style="color: var(--text-muted); font-style: italic; font-size: 11px;">No execution logs captured for this phase.</p>'
@@ -1256,7 +1262,7 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
     waf_banner_html = ""
     if recon_intel["waf_detected"]:
         waf_banner_html = f"""
-        <div style="background: #d2992222; border: 1px solid #d29922; color: #d29922; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 13px;">
+        <div style="background: var(--warning)22; border: 1px solid var(--warning); color: var(--warning); padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 13px;">
             ⚠️ <strong>Active Security Proxy / WAF Detected ({html.escape(recon_intel['waf_name'])}):</strong> Traffic to {html.escape(target)} is actively inspected by a Web Application Firewall. Some automated probes may be subject to payload drop or rate-limiting restrictions.
         </div>
         """
@@ -1280,8 +1286,8 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
             <td><strong style="color: var(--accent);">{c['cvss_score']}</strong> / 10.0</td>
             <td><span style="color: var(--warning); font-weight: 700;">{c['epss_score']*100:.1f}%</span> ({c['epss_percentile']:.1f}th %)</td>
             <td>{kev_badge}</td>
-            <td><strong style="color: #ff7b72;">{c['risk_score']}</strong> / 100</td>
-            <td><code style="color: #7ee787;">{html.escape(c['financial_range'])}</code></td>
+            <td><strong style="color: var(--danger);">{c['risk_score']}</strong> / 100</td>
+            <td><code style="color: var(--success);">{html.escape(c['financial_range'])}</code></td>
         </tr>
         """
 
@@ -1361,8 +1367,8 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
 
         <div class="cover-score-box">
             <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #8b949e; margin-bottom: 4px;">OFFICIAL SECURITY POSTURE RATING</div>
-            <div style="font-size: 42px; font-weight: 800; color: {score_color};">{security_score} <span style="font-size: 26px;">/ 100 [{score_grade}]</span></div>
-            <div style="font-size: 14px; font-weight: 700; color: #ffffff; margin-top: 4px;">{grade_label} — OVERALL RISK: {risk_rating}</div>
+            <div style="font-size: 42px; font-weight: 800; color: var(--score-color);">{security_score} <span style="font-size: 26px;">/ 100 [{score_grade}]</span></div>
+            <div style="font-size: 14px; font-weight: 700; color: var(--text); margin-top: 4px;">{grade_label} — OVERALL RISK: {risk_rating}</div>
         </div>
 
         <div class="cover-footer">
@@ -1386,13 +1392,13 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
                 <td style="border: none; width: 50%; padding-right: 20px;">
                     <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 40px;">AUTHORIZED AUDITOR / SECURITY ENGAGEMENT LEAD</div>
                     <div style="border-bottom: 1px solid var(--border); margin-bottom: 6px;"></div>
-                    <div style="font-size: 12px; font-weight: 700; color: #ffffff;">Lead Security Assessor</div>
+                    <div style="font-size: 12px; font-weight: 700; color: var(--text);">Lead Security Assessor</div>
                     <div style="font-size: 11px; color: var(--text-muted);">{html.escape(company)}</div>
                 </td>
                 <td style="border: none; width: 50%; padding-left: 20px;">
                     <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 40px;">EXECUTIVE RECIPIENT / CISO APPROVAL</div>
                     <div style="border-bottom: 1px solid var(--border); margin-bottom: 6px;"></div>
-                    <div style="font-size: 12px; font-weight: 700; color: #ffffff;">Chief Information Security Officer</div>
+                    <div style="font-size: 12px; font-weight: 700; color: var(--text);">Chief Information Security Officer</div>
                     <div style="font-size: 11px; color: var(--text-muted);">Tracking Ref: {audit_ref}</div>
                 </td>
             </tr>
@@ -1422,6 +1428,8 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
         --warning: #d29922;
         --success: #3fb950;
         --purple: #bc8cff;
+        --score-color: {score_color};
+        --risk-color: {risk_color};
     }}
     body {{
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -1496,7 +1504,7 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
     }}
     .cover-score-box {{
         background: var(--panel);
-        border: 2px solid {score_color};
+        border: 2px solid var(--score-color);
         padding: 24px;
         border-radius: 10px;
         max-width: 500px;
@@ -1529,9 +1537,9 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
     }}
     h1 {{ color: #ffffff; margin: 0; font-size: 22px; font-weight: 700; }}
     .risk-banner {{
-        background: {risk_color}22;
-        color: {risk_color};
-        border: 1px solid {risk_color};
+        background: var(--risk-color)22;
+        color: var(--risk-color);
+        border: 1px solid var(--risk-color);
         padding: 6px 14px;
         border-radius: 16px;
         font-weight: 800;
@@ -1581,35 +1589,95 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
     
     .poc-box {{ background: #010409; color: #7ee787; border: 1px solid var(--border); padding: 10px; border-radius: 6px; font-size: 10px; white-space: pre-wrap; word-wrap: break-word; overflow-x: visible; font-family: monospace; margin: 4px 0; }}
     .log-block {{ background: #010409; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 14px; padding: 12px; page-break-inside: auto; }}
+    .log-block pre {{
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        margin: 2px 0;
+        padding: 8px;
+        background: #080c10;
+        color: #7ee787;
+        border-radius: 4px;
+        font-size: 10px;
+        line-height: 1.3;
+    }}
     
     .toc-box {{ background: #010409; border: 1px solid var(--border); border-radius: 6px; padding: 12px; margin-bottom: 20px; font-size: 12px; }}
     .toc-box a {{ color: var(--accent); text-decoration: none; font-weight: 600; margin-right: 15px; }}
     
     @media print {{
-        body {{ background-color: #ffffff !important; color: #000000 !important; padding: 0 !important; }}
+        :root {{
+            --bg: #ffffff;
+            --panel: #ffffff;
+            --panel-hover: #f6f8fa;
+            --border: #d0d7de;
+            --text: #24292f;
+            --text-muted: #57606a;
+            --accent: #0969da;
+            --danger: #cf222e;
+            --warning: #9a6700;
+            --success: #1a7f37;
+            --purple: #8250df;
+            --score-color: {score_print_color};
+            --risk-color: {risk_print_color};
+        }}
+        body {{
+            background-color: var(--bg) !important;
+            color: var(--text) !important;
+            padding: 0 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }}
         .container {{ max-width: 100% !important; }}
-        .header, .section-card, .vuln-card, .log-block, .cover-meta-item, .cover-score-box {{ background: #ffffff !important; border: 1px solid #cccccc !important; color: #000000 !important; box-shadow: none !important; }}
-        h1, h2, h3, h4, .cover-title {{ color: #000000 !important; }}
-        .poc-box {{ background: #f6f8fa !important; color: #24292e !important; border: 1px solid #e1e4e8 !important; white-space: pre-wrap !important; word-break: break-all !important; }}
-        code {{ background: #f6f8fa !important; color: #000000 !important; border: 1px solid #e1e4e8 !important; }}
-        th {{ background: #f0f0f0 !important; color: #000000 !important; }}
+        .header, .section-card, .vuln-card, .log-block, .cover-meta-item, .cover-score-box {{
+            background: var(--panel) !important;
+            border: 1px solid var(--border) !important;
+            color: var(--text) !important;
+            box-shadow: none !important;
+        }}
+        h1, h2, h3, h4, .cover-title {{ color: var(--text) !important; }}
+        .poc-box {{
+            background: var(--panel-hover) !important;
+            color: var(--text) !important;
+            border: 1px solid var(--border) !important;
+            white-space: pre-wrap !important;
+            word-break: break-all !important;
+        }}
+        code {{
+            background: var(--panel-hover) !important;
+            color: var(--text) !important;
+            border: 1px solid var(--border) !important;
+        }}
+        th {{
+            background: var(--panel-hover) !important;
+            color: var(--text) !important;
+            border-bottom: 2px solid var(--border) !important;
+        }}
+        td {{
+            border-bottom: 1px solid var(--border) !important;
+        }}
+        .log-block pre {{
+            background: var(--panel-hover) !important;
+            color: var(--text) !important;
+            border: 1px solid var(--border) !important;
+        }}
         
         /* Overrides for cover page and text contrast */
-        .cover-subtitle {{ color: #333333 !important; }}
-        .cover-meta-label {{ color: #555555 !important; }}
-        .cover-meta-value {{ color: #000000 !important; }}
-        .cover-score-box div {{ color: #000000 !important; }}
-        .cover-footer {{ color: #555555 !important; border-top: 1px solid #cccccc !important; }}
+        .cover-subtitle {{ color: var(--text-muted) !important; }}
+        .cover-meta-label {{ color: var(--text-muted) !important; }}
+        .cover-meta-value {{ color: var(--text) !important; }}
+        .cover-score-box div {{ color: var(--text) !important; }}
+        .cover-footer {{ color: var(--text-muted) !important; border-top: 1px solid var(--border) !important; }}
         
-        .metric-value {{ color: #000000 !important; }}
-        .header-title strong {{ color: #000000 !important; }}
+        .metric-value {{ color: var(--text) !important; }}
+        .header-title strong {{ color: var(--text) !important; }}
         
-        .vuln-meta-table th {{ color: #555555 !important; }}
-        .vuln-meta-table td {{ color: #000000 !important; }}
+        .vuln-meta-table th {{ color: var(--text-muted) !important; }}
+        .vuln-meta-table td {{ color: var(--text) !important; }}
         
         /* Inline style color overrides for white-on-white text */
         [style*="color: #ffffff"], [style*="color:#ffffff"], [style*="color: white"], [style*="color:white"] {{
-            color: #000000 !important;
+            color: var(--text) !important;
         }}
     }}
 </style>
@@ -1623,18 +1691,18 @@ def write_pdf_report(report_data, work_dir, pdf_target_path, company="Authorized
         <div class="header-title">
             <div>
                 <h1>Penetration Testing &amp; Audit Summary</h1>
-                <div style="color: var(--text-muted); font-size: 13px; margin-top: 4px;">Target Domain: <strong style="color: #ffffff;">{html.escape(target)}</strong> | Ref Code: <strong style="color: var(--accent);">{audit_ref}</strong></div>
+                <div style="color: var(--text-muted); font-size: 13px; margin-top: 4px;">Target Domain: <strong style="color: var(--text);">{html.escape(target)}</strong> | Ref Code: <strong style="color: var(--accent);">{audit_ref}</strong></div>
             </div>
             <div class="risk-banner">Overall Risk: {risk_rating}</div>
         </div>
         
         <!-- Top Metrics Cards -->
         <div class="grid-4">
-            <div class="metric-card" style="border-left: 4px solid {score_color};">
+            <div class="metric-card" style="border-left: 4px solid var(--score-color);">
                 <div class="metric-label">Security Posture Score</div>
-                <div class="metric-value" style="color: {score_color}; font-size: 20px;">{security_score}/100 <span style="font-size: 14px;">[{score_grade}]</span></div>
+                <div class="metric-value" style="color: var(--score-color); font-size: 20px;">{security_score}/100 <span style="font-size: 14px;">[{score_grade}]</span></div>
             </div>
-            <div class="metric-card"><div class="metric-label">Assessment Date</div><div class="metric-value" style="color: #ffffff; font-size: 13px;">{report_data['date']}</div></div>
+            <div class="metric-card"><div class="metric-label">Assessment Date</div><div class="metric-value" style="color: var(--text); font-size: 13px;">{report_data['date']}</div></div>
             <div class="metric-card"><div class="metric-label">Duration</div><div class="metric-value">{report_data['duration']:.1f}s</div></div>
             <div class="metric-card"><div class="metric-label">Subdomains Mapped</div><div class="metric-value" style="color: var(--purple);">{len(recon_intel['subdomains'])}</div></div>
         </div>
